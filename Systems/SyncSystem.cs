@@ -3,21 +3,27 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
 using System.IO;
+using UnifiedInventory.Utils;
+
+
 using UnifiedInventory.Database;
 
-public class SyncSystem : ModSystem
+namespace SyncSystem
 {
-    private double syncTimer = 0;
-
-    public override void PostUpdatePlayers()
+    public class SyncSystem : ModSystem
     {
-        syncTimer += 1.0 / 60.0; // Assuming 60 FPS
+        private double syncTimer = 0;
 
-        if (syncTimer >= 2.0)
+        public override void PostUpdatePlayers()
         {
-            syncTimer = 0;
-            var data = SqlInventoryManager.LoadInventory();
-            InventoryUtils.ApplySlotData(Main.LocalPlayer.inventory, data);
+            syncTimer += 1.0 / 60.0; // Assuming 60 FPS
+
+            if (syncTimer >= 2.0)
+            {
+                syncTimer = 0;
+                var data = SqlInventoryManager.LoadInventory();
+                InventoryUtils.ApplySlotData(Main.LocalPlayer.inventory, data);
+            }
         }
     }
 }

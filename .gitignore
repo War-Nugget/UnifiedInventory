@@ -5,7 +5,7 @@
 *.tmp
 
 /bin/
-/obj/
+obj/
 *.user
 *.suo
 *.cache

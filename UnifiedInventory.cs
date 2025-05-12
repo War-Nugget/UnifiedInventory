@@ -1,9 +1,18 @@
 using System;
+using Terraria;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Terraria.ModLoader;
+
+using UnifiedInventory.Utils;
+using UnifiedInventory.Database;
+using UnifiedInventory.Systems;
+
+using System.IO;
+
+
 
 namespace UnifiedInventory
 {
@@ -37,6 +46,16 @@ namespace UnifiedInventory
 					break;
 			}
 		}
+		public override void Load()
+		{
+			// Optional: any global setup (e.g., logging, singletons, DB init fallback)
+		}
+
+		public override void Unload()
+		{
+			// Optional cleanup (set static references to null, etc.)
+		}
+
 
 	}
 }

@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
 using System.IO;
+
 using UnifiedInventory.Database;
 using UnifiedInventory.Utils;
 using System.Collections.Generic;
@@ -16,15 +17,7 @@ namespace UnifiedInventory.Systems
         {
             SyncInventory
         }
-
-        public override void OnModLoad()
-        {
-            if (!Main.dedServ)
-                return;
-
-            ModNetHandler.Register(PacketType.SyncInventory, HandleSyncInventory);
-        }
-
+    
         public static void SendInventory(Player player, int toWho = -1, int ignore = -1)
         {
             var slotData = InventoryUtils.ToSlotData(player.inventory);
