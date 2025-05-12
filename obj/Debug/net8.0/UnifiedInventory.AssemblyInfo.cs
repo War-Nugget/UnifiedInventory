@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UnifiedInventory")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+389d1e4d5f444809cefb871ee6e4757ec4f3bbfe")]
 [assembly: System.Reflection.AssemblyProductAttribute("UnifiedInventory")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UnifiedInventory")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

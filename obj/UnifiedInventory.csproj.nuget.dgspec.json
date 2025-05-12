@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\sahil\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\UnifiedInventory\\UnifiedInventory.csproj": {}
+    "C:\\Users\\sahil\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\UnifiedInventory\\UnifiedInventory.csproj": {}
   },
   "projects": {
-    "c:\\Users\\sahil\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\UnifiedInventory\\UnifiedInventory.csproj": {
+    "C:\\Users\\sahil\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\UnifiedInventory\\UnifiedInventory.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\sahil\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\UnifiedInventory\\UnifiedInventory.csproj",
+        "projectUniqueName": "C:\\Users\\sahil\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\UnifiedInventory\\UnifiedInventory.csproj",
         "projectName": "UnifiedInventory",
-        "projectPath": "c:\\Users\\sahil\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\UnifiedInventory\\UnifiedInventory.csproj",
+        "projectPath": "C:\\Users\\sahil\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\UnifiedInventory\\UnifiedInventory.csproj",
         "packagesPath": "C:\\Users\\sahil\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\sahil\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\UnifiedInventory\\obj\\",
+        "outputPath": "C:\\Users\\sahil\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\UnifiedInventory\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sahil\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -43,6 +43,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "System.Data.SQLite": {
+              "target": "Package",
+              "version": "[1.0.119, )"
+            },
             "tModLoader.CodeAssist": {
               "target": "Package",
               "version": "[0.1.*, )"
