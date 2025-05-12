@@ -3,12 +3,13 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
 using System.IO;
+
 using UnifiedInventory.SharedInventory.Utils;
-
-
 using UnifiedInventory.SharedInventory.Database;
+using UnifiedInventory.SharedInventory.Systems;
+using UnifiedInventory.SharedInventory.Config;
 
-namespace SyncSystem
+namespace UnifiedInventory.SharedInventory.Systems
 {
     public class SyncSystem : ModSystem
     {
@@ -16,12 +17,13 @@ namespace SyncSystem
 
         public override void PostUpdatePlayers()
         {
+            int interval = ModContent.GetInstance<UnifiedInventoryConfig>().SyncIntervalSeconds;
+            bool enabled = ModContent.GetInstance<UnifiedInventoryConfig>().EnableSharedInventory;
             syncTimer += 1.0 / 60.0; // Assuming 60 FPS
 
-            if (syncTimer >= 2.0)
+            if (enabled && Main.myPlayer == TeamSyncTracker.GetTeamHost(Main.LocalPlayer.team))
             {
-                syncTimer = 0;
-                var data = SqlInventoryManager.LoadInventory();
+                var data = SqlInventoryManager.LoadInventory(Main.LocalPlayer.team);
                 InventoryUtils.ApplySlotData(Main.LocalPlayer.inventory, data);
             }
         }

@@ -25,7 +25,7 @@ namespace UnifiedInventory.SharedInventory.Database
             cmd.ExecuteNonQuery();
         }
 
-        public static void SaveInventory(List<InventorySlotData> slots)
+        public static void SaveInventory(int teamId, List<InventorySlotData> slots)
         {
             using var tx = connection.BeginTransaction();
 
@@ -35,6 +35,7 @@ namespace UnifiedInventory.SharedInventory.Database
                     INSERT OR REPLACE INTO shared_inventory (slot_index, item_id, item_stack, item_prefix)
                     VALUES (@slot, @id, @stack, @prefix)", connection);
 
+                cmd.Parameters.AddWithValue("@team", teamId);
                 cmd.Parameters.AddWithValue("@slot", slot.SlotIndex);
                 cmd.Parameters.AddWithValue("@id", slot.ItemID);
                 cmd.Parameters.AddWithValue("@stack", slot.Stack);
@@ -46,11 +47,13 @@ namespace UnifiedInventory.SharedInventory.Database
             tx.Commit();
         }
 
-        public static List<InventorySlotData> LoadInventory()
+        public static List<InventorySlotData> LoadInventory(int teamId)
         {
             var result = new List<InventorySlotData>();
 
-            using var cmd = new SQLiteCommand("SELECT * FROM shared_inventory ORDER BY slot_index", connection);
+            using var cmd = new SQLiteCommand("SELECT * FROM shared_inventory WHERE team_id = @team ORDER BY slot_index", connection);
+            cmd.Parameters.AddWithValue("@team", teamId);
+
             using var reader = cmd.ExecuteReader();
 
             while (reader.Read())
