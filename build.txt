@@ -1,0 +1,3 @@
+displayName = Unified Inventory
+author = War-Nugget
+version = 0.1
