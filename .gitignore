@@ -1,0 +1,28 @@
+# Ignore build artifacts
+/build/
+*.tmod
+*.tmx
+*.tmp
+
+/bin/
+/obj/
+*.user
+*.suo
+*.cache
+*.pdb
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+.idea/
+
+# Ignore VS Code settings (optional)
+.vscode/
+
+*.bak
+*.bak2
+
+# Ignore local debug logs (if any)
+*.log
+*.sqlite
