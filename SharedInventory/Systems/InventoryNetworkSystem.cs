@@ -4,12 +4,12 @@ using Terraria.ID;
 using Terraria.ModLoader.IO;
 using System.IO;
 
-using UnifiedInventory.Database;
-using UnifiedInventory.Utils;
+using UnifiedInventory.SharedInventory.Database;
+using UnifiedInventory.SharedInventory.Utils;
 using System.Collections.Generic;
 
 
-namespace UnifiedInventory.Systems
+namespace UnifiedInventory.SharedInventory.Systems
 {
     public class InventoryNetworkSystem : ModSystem
     {

@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Terraria.ModLoader;
 
-using UnifiedInventory.Utils;
-using UnifiedInventory.Database;
-using UnifiedInventory.Systems;
+using UnifiedInventory.SharedInventory.Utils;
+using UnifiedInventory.SharedInventory.Database;
+using UnifiedInventory.SharedInventory.Systems;
 
 using System.IO;
 

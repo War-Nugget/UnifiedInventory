@@ -4,10 +4,10 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
 using System.IO;
-using UnifiedInventory.Database;
-using UnifiedInventory.Utils;
+using UnifiedInventory.SharedInventory.Database;
+using UnifiedInventory.SharedInventory.Utils;
 
-namespace UnifiedInventory.Utils
+namespace UnifiedInventory.SharedInventory.Utils
 {
     public static class InventoryUtils
     {

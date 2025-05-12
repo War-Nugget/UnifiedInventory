@@ -1,6 +1,6 @@
 
 
-namespace UnifiedInventory.Database
+namespace UnifiedInventory.SharedInventory.Database
 {
     public class InventorySlotData
     {

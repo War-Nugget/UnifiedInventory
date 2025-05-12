@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite; // Change to MySqlConnection if using MySQL
-using UnifiedInventory.Database;
+using UnifiedInventory.SharedInventory.Database;
 
-namespace UnifiedInventory.Database
+namespace UnifiedInventory.SharedInventory.Database
 {
     public static class SqlInventoryManager
     {

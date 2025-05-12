@@ -3,10 +3,10 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
 using System.IO;
-using UnifiedInventory.Utils;
+using UnifiedInventory.SharedInventory.Utils;
 
 
-using UnifiedInventory.Database;
+using UnifiedInventory.SharedInventory.Database;
 
 namespace SyncSystem
 {
