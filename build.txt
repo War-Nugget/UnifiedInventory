@@ -1,4 +1,4 @@
 displayName = Unified Inventory
 author = War-Nugget
 version = 0.1
-dllReferences = System.Data.SQLite.dll
+dllReferences = System.Data.SQLite
