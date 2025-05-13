@@ -1,15 +1,11 @@
-using Terraria.ModLoader;
 using Terraria;
-using Terraria.ID;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using System.IO;
+using UnifiedInventory.SharedInventory.Database;    // for InventorySlotData
+using UnifiedInventory.SharedInventory.Systems;     // for TeamInventorySystem
 
-using UnifiedInventory.SharedInventory.Database;
-using UnifiedInventory.SharedInventory.Utils;
-using System.Collections.Generic;
-
-
-namespace UnifiedInventory.SharedInventory.Systems
+namespace UnifiedInventory.SharedInventory.Network
 {
     public class InventoryNetworkSystem : ModSystem
     {
@@ -17,24 +13,57 @@ namespace UnifiedInventory.SharedInventory.Systems
         {
             SyncInventory
         }
-    
+
+        /// <summary>
+        /// Sends the full shared‐inventory array for this player’s team.
+        /// </summary>
         public static void SendInventory(Player player, int toWho = -1, int ignore = -1)
         {
-            var slotData = InventoryUtils.ToSlotData(player.inventory);
+            int teamID = player.team;
+            if (!TeamInventorySystem.TeamInventories.TryGetValue(teamID, out var slots))
+                return;
 
+            // Create packet and write header
             ModPacket packet = ModContent.GetInstance<UnifiedInventory>().GetPacket();
             packet.Write((byte)PacketType.SyncInventory);
-            packet.Write((byte)slotData.Count);
 
-            foreach (var slot in slotData)
+            // Write slot count
+            packet.Write((byte)slots.Length);
+
+            // Serialize each slot: index + full Item data
+            foreach (var slot in slots)
             {
                 packet.Write(slot.SlotIndex);
-                packet.Write(slot.ItemID);
-                packet.Write(slot.Stack);
-                packet.Write(slot.Prefix);
+                ItemIO.Send(slot.Item, packet, writeStack: true, writeDefaults: true);
             }
 
             packet.Send(toWho, ignore);
+        }
+
+        /// <summary>
+        /// Receives a SyncInventory packet and populates the local array.
+        /// </summary>
+        public override void HandlePacket(BinaryReader reader, int whoAmI)
+        {
+            PacketType packetType = (PacketType)reader.ReadByte();
+            if (packetType == PacketType.SyncInventory)
+            {
+                int count = reader.ReadByte();
+
+                // Determine which team this applies to (the sender)
+                int teamID = Main.player[whoAmI].team;
+                var slots = TeamInventorySystem.TeamInventories[teamID];
+
+                for (int i = 0; i < count; i++)
+                {
+                    int slotIndex = reader.ReadInt32();
+                    var item = new Item();
+                    ItemIO.Receive(item, reader, readStack: true, readDefaults: true);
+
+                    // Overwrite that slot’s Item
+                    slots[slotIndex].Item = item;
+                }
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ namespace UnifiedInventory.SharedInventory.Config
         public override ConfigScope Mode => ConfigScope.ServerSide;
 
         [Label("Sync Interval (seconds)")]
-        [Tooltip("How often the team host should sync the inventory from the database.")]
+        [Tooltip("How often the team host should sync the shared inventory in memory.")]
         [Range(1, 10)]
         [DefaultValue(2)]
         public int SyncIntervalSeconds { get; set; }
@@ -17,10 +17,5 @@ namespace UnifiedInventory.SharedInventory.Config
         [Tooltip("Enable or disable the shared inventory system entirely.")]
         [DefaultValue(true)]
         public bool EnableSharedInventory { get; set; }
-
-        // Optional future feature:
-        //[Label("Custom DB Path")]
-        //[DefaultValue("SharedInventory.sqlite")]
-        //public string DatabasePath { get; set; }
     }
 }
