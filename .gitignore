@@ -1,5 +1,5 @@
 # Ignore build artifacts
-/build/
+
 *.tmod
 *.tmx
 *.tmp
