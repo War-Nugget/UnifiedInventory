@@ -7,7 +7,7 @@ using UnifiedInventory.SharedInventory.Systems;     // for TeamInventorySystem
 
 namespace UnifiedInventory.SharedInventory.Network
 {
-    public class InventoryNetworkSystem : ModSystem
+    public class InventoryNetworkSystem : Mod  
     {
         public enum PacketType : byte
         {
@@ -34,7 +34,7 @@ namespace UnifiedInventory.SharedInventory.Network
             foreach (var slot in slots)
             {
                 packet.Write(slot.SlotIndex);
-                ItemIO.Send(slot.Item, packet, writeStack: true, writeDefaults: true);
+                ItemIO.Send(slot.Item, packet, writeStack: true, writeFavorite: true);
             }
 
             packet.Send(toWho, ignore);
@@ -45,12 +45,10 @@ namespace UnifiedInventory.SharedInventory.Network
         /// </summary>
         public override void HandlePacket(BinaryReader reader, int whoAmI)
         {
-            PacketType packetType = (PacketType)reader.ReadByte();
+            var packetType = (PacketType)reader.ReadByte();
             if (packetType == PacketType.SyncInventory)
             {
-                int count = reader.ReadByte();
-
-                // Determine which team this applies to (the sender)
+                byte count = reader.ReadByte();
                 int teamID = Main.player[whoAmI].team;
                 var slots = TeamInventorySystem.TeamInventories[teamID];
 
@@ -58,9 +56,7 @@ namespace UnifiedInventory.SharedInventory.Network
                 {
                     int slotIndex = reader.ReadInt32();
                     var item = new Item();
-                    ItemIO.Receive(item, reader, readStack: true, readDefaults: true);
-
-                    // Overwrite that slot’s Item
+                    ItemIO.Receive(item, reader, readStack: true, readFavorite: true);
                     slots[slotIndex].Item = item;
                 }
             }
