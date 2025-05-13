@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite; // Change to MySqlConnection if using MySQL
+using System.IO;
+using Terraria.ModLoader;
 using UnifiedInventory.SharedInventory.Database;
 
 namespace UnifiedInventory.SharedInventory.Database
@@ -10,17 +12,24 @@ namespace UnifiedInventory.SharedInventory.Database
     {
         private static SQLiteConnection connection;
 
-        public static void Initialize(string dbPath)
+        public static void Initialize(string filename = "UnifiedInventory.sqlite")
         {
+            string modSavePath = Path.Combine(ModContent.GetInstance<UnifiedInventory>().Name, "LocalData");
+            if (!Directory.Exists(modSavePath))
+                Directory.CreateDirectory(modSavePath);
+
+            string dbPath = Path.Combine(modSavePath, "UnifiedInventory.sqlite");
             connection = new SQLiteConnection($"Data Source={dbPath};Version=3;");
             connection.Open();
 
             using var cmd = new SQLiteCommand(@"
                 CREATE TABLE IF NOT EXISTS shared_inventory (
-                    slot_index INTEGER PRIMARY KEY,
+                    team_id INTEGER,
+                    slot_index INTEGER,
                     item_id INTEGER,
                     item_stack INTEGER,
-                    item_prefix INTEGER
+                    item_prefix INTEGER,
+                    PRIMARY KEY (team_id, slot_index)
                 )", connection);
             cmd.ExecuteNonQuery();
         }
