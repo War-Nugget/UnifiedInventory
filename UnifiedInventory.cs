@@ -21,7 +21,7 @@ namespace UnifiedInventory
     {
 	public override void HandlePacket(BinaryReader reader, int whoAmI)
 	{
-		ModContent.GetInstance<InventoryNetworkSystem>().HandlePacket(reader, whoAmI);
+	    ModContent.GetInstance<InventoryNetworkSystem>().HandlePacket(reader, whoAmI);
 	
 	}
 

@@ -7,7 +7,7 @@ using UnifiedInventory.SharedInventory.Systems;     // for TeamInventorySystem
 
 namespace UnifiedInventory.SharedInventory.Network
 {
-    public class InventoryNetworkSystem : Mod  
+    public class InventoryNetworkSystem : ModSystem
     {
         public enum PacketType : byte
         {
@@ -43,7 +43,7 @@ namespace UnifiedInventory.SharedInventory.Network
         /// <summary>
         /// Receives a SyncInventory packet and populates the local array.
         /// </summary>
-        public override void HandlePacket(BinaryReader reader, int whoAmI)
+        public void HandlePacket(BinaryReader reader, int whoAmI)
         {
             var packetType = (PacketType)reader.ReadByte();
             if (packetType == PacketType.SyncInventory)

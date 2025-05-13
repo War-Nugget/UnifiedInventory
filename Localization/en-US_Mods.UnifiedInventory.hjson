@@ -1,2 +1,15 @@
-# This file will automatically update with entries for new content after a build and reload.
+Configs: {
+	UnifiedInventoryConfig: {
+		DisplayName: Unified Inventory Config
 
+		SyncIntervalSeconds: {
+			Label: Sync Interval (seconds)
+			Tooltip: How often the team host should sync the shared inventory in memory.
+		}
+
+		EnableSharedInventory: {
+			Label: Enable Shared Inventory
+			Tooltip: Enable or disable the shared inventory system entirely.
+		}
+	}
+}
