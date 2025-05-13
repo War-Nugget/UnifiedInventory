@@ -1,1 +1,3 @@
-Modify this file with a description of your mod.
+Imagine, your friend dies and loses everything. You've also lost. Enjoy.
+
+This is a combined inventory mod, everyone shares one inventory. 

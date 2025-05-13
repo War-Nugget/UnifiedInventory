@@ -40,7 +40,7 @@ namespace UnifiedInventory.Database
                 cmd.Parameters.AddWithValue("@stack", slot.Stack);
                 cmd.Parameters.AddWithValue("@prefix", slot.Prefix);
 
-                cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();  //Calls for the item index, which item, how many, and what it is
             }
 
             tx.Commit();
@@ -62,7 +62,7 @@ namespace UnifiedInventory.Database
                     Stack = Convert.ToInt32(reader["item_stack"]),
                     Prefix = Convert.ToInt32(reader["item_prefix"])
                 });
-            }
+            } //This one sends data to InventorySlotData.cs
 
             return result;
         }
