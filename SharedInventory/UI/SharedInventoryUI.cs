@@ -19,6 +19,8 @@ namespace UnifiedInventory.SharedInventory.UI
         private const int SlotSize = 50;
         private const int Padding  = 5;
 
+        public static object Instance { get; internal set; }
+
         public override void OnInitialize()
         {
             base.OnInitialize();
