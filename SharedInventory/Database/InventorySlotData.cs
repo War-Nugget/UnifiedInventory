@@ -1,3 +1,4 @@
+using System;
 using Terraria;
 
 namespace UnifiedInventory.SharedInventory.Database
@@ -26,6 +27,11 @@ namespace UnifiedInventory.SharedInventory.Database
         {
             SlotIndex = slotIndex;
             Item = item ?? new Item();
+        }
+
+        public static implicit operator InventorySlotData(Item v)
+        {
+            throw new NotImplementedException();
         }
     }
 }
