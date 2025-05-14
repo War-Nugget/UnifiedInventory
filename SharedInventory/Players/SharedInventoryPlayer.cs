@@ -1,8 +1,8 @@
 using Terraria;
 using Terraria.ModLoader;
+using Microsoft.Xna.Framework;
 using UnifiedInventory.SharedInventory.Systems;
-using UnifiedInventory.SharedInventory.Utils;
-using UnifiedInventory.SharedInventory.Database;
+using UnifiedInventory.SharedInventory.Network;
 
 namespace UnifiedInventory.SharedInventory.Players
 {
@@ -13,46 +13,60 @@ namespace UnifiedInventory.SharedInventory.Players
 
         public override void PostUpdate()
         {
-            // 1. Detect team join
+            // 1) Detect when we join/switch teams
             if (Player.team > 0 && Player.team != lastTeam)
             {
                 TeamSyncTracker.RegisterTeamHost(Player.team, Player.whoAmI);
                 lastTeam = Player.team;
+
+                // If *we* are the new host, seed the shared array and broadcast it immediately
+                if (TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
+                {
+                    SeedSharedArray();
+                    lastInventorySnapshot = CloneInventory(Player.inventory);
+                    InventoryNetworkSystem.SendInventory(Player);
+                }
             }
 
-            // 2. If host of team, check for inventory changes
+            // 2) If *we* are the host, watch for local changes and re-broadcast
             if (Player.team > 0 && TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
             {
                 if (InventoryChanged())
                 {
-                    var slots = InventoryUtils.ToSlotData(Player.inventory);
-                    SqlInventoryManager.SaveInventory(Player.team, slots);
-                    lastInventorySnapshot = (Item[])Player.inventory.Clone(); // Deep copy not required for netID/stack/prefix tracking
+                    SeedSharedArray();
+                    InventoryNetworkSystem.SendInventory(Player);
+                    lastInventorySnapshot = CloneInventory(Player.inventory);
                 }
             }
         }
+
         public override void OnEnterWorld()
         {
-            if (Player.team > 0)
+            if (Player.team > 0 && !TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
             {
-                var data = SqlInventoryManager.LoadInventory(Player.team);
-                InventoryUtils.ApplySlotData(Player.inventory, data);
-
-                var teamColor = Player.team switch
-                {
-                    1 => Microsoft.Xna.Framework.Color.Red,
-                    2 => Microsoft.Xna.Framework.Color.Green,
-                    3 => Microsoft.Xna.Framework.Color.Blue,
-                    4 => Microsoft.Xna.Framework.Color.Yellow,
-                    5 => Microsoft.Xna.Framework.Color.Purple,
-                    _ => Microsoft.Xna.Framework.Color.White
-                };
-
-                Main.NewText($"[SharedInventory] Synced inventory for Team {GetTeamName(Player.team)}", teamColor);
-
+                // Non-hosts wait for the SyncInventory packet to populate their UI
+                Main.NewText(
+                    $"[SharedInventory] Synced inventory for Team {GetTeamName(Player.team)}",
+                    GetTeamColor(Player.team)
+                );
             }
         }
 
+        private void SeedSharedArray()
+        {
+            var sharedSlots = TeamInventorySystem.TeamInventories[Player.team];
+            // Copy each slot from Player.inventory → sharedSlots[i].Item
+            for (int i = 0; i < Player.inventory.Length && i < sharedSlots.Length; i++)
+                sharedSlots[i].Item = Player.inventory[i].Clone();
+        }
+
+        private Item[] CloneInventory(Item[] inv)
+        {
+            var clone = new Item[inv.Length];
+            for (int i = 0; i < inv.Length; i++)
+                clone[i] = inv[i].Clone();
+            return clone;
+        }
 
         private bool InventoryChanged()
         {
@@ -63,25 +77,31 @@ namespace UnifiedInventory.SharedInventory.Players
             {
                 var a = Player.inventory[i];
                 var b = lastInventorySnapshot[i];
-
-                if (a.netID != b?.netID || a.stack != b?.stack || a.prefix != b?.prefix)
+                if (a.netID != b.netID || a.stack != b.stack || a.prefix != b.prefix)
                     return true;
             }
 
             return false;
         }
-        private string GetTeamName(int team)
-        {
-            return team switch
-            {
-                1 => "Red",
-                2 => "Green",
-                3 => "Blue",
-                4 => "Yellow",
-                5 => "Purple",
-                _ => "None"
-            };
-        }
 
+        private string GetTeamName(int team) => team switch
+        {
+            1 => "Red",
+            2 => "Green",
+            3 => "Blue",
+            4 => "Yellow",
+            5 => "Purple",
+            _ => "None"
+        };
+
+        private Color GetTeamColor(int team) => team switch
+        {
+            1 => Color.Red,
+            2 => Color.Green,
+            3 => Color.Blue,
+            4 => Color.Yellow,
+            5 => Color.Purple,
+            _ => Color.White
+        };
     }
 }

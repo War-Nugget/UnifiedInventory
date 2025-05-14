@@ -1,13 +1,7 @@
-using Terraria.ModLoader;
 using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader.IO;
-using System.IO;
-
-using UnifiedInventory.SharedInventory.Utils;
-using UnifiedInventory.SharedInventory.Database;
-using UnifiedInventory.SharedInventory.Systems;
+using Terraria.ModLoader;
 using UnifiedInventory.SharedInventory.Config;
+using UnifiedInventory.SharedInventory.Systems; // for TeamSyncTracker & TeamInventorySystem
 
 namespace UnifiedInventory.SharedInventory.Systems
 {
@@ -17,15 +11,31 @@ namespace UnifiedInventory.SharedInventory.Systems
 
         public override void PostUpdatePlayers()
         {
-            int interval = ModContent.GetInstance<UnifiedInventoryConfig>().SyncIntervalSeconds;
-            bool enabled = ModContent.GetInstance<UnifiedInventoryConfig>().EnableSharedInventory;
-            syncTimer += 1.0 / 60.0; // Assuming 60 FPS
+            var config = ModContent.GetInstance<UnifiedInventoryConfig>();
+            if (!config.EnableSharedInventory)
+                return;
 
-            if (enabled && Main.myPlayer == TeamSyncTracker.GetTeamHost(Main.LocalPlayer.team))
-            {
-                var data = SqlInventoryManager.LoadInventory(Main.LocalPlayer.team);
-                InventoryUtils.ApplySlotData(Main.LocalPlayer.inventory, data);
-            }
+            syncTimer += 1.0 / 60.0;                    // accumulate seconds
+            if (syncTimer < config.SyncIntervalSeconds)
+                return;
+            syncTimer = 0;
+
+            int team = Main.LocalPlayer.team;
+            if (team <= 0)
+                return;
+
+            // Only non-hosts apply the shared array to their own inventory
+            int? hostId = TeamSyncTracker.GetTeamHost(team);
+            if (!hostId.HasValue || TeamSyncTracker.IsTeamHost(team, Main.myPlayer))
+                return;
+
+            if (!TeamInventorySystem.TeamInventories.TryGetValue(team, out var slots))
+                return;
+
+            // Overwrite the local inventory with the shared slots
+            for (int i = 0; i < Main.LocalPlayer.inventory.Length && i < slots.Length; i++)
+                Main.LocalPlayer.inventory[i] = slots[i].Item.Clone();
         }
     }
 }
+ 

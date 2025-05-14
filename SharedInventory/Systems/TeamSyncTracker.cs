@@ -1,39 +1,27 @@
-using Terraria.ModLoader;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader.IO;
-using System.IO;
-using UnifiedInventory.SharedInventory.Utils;
 using System.Collections.Generic;
 
-using UnifiedInventory.SharedInventory.Database;
-
-
-namespace UnifiedInventory.SharedInventory.Systems;
+namespace UnifiedInventory.SharedInventory.Systems
+{
+    /// <summary>
+    /// Keeps track of which player is acting as the host for each team.
+    /// </summary>
     public static class TeamSyncTracker
     {
-        private static Dictionary<int, int> teamHosts = new(); // team => player.whoAmI
+        private static Dictionary<int, int> teamHosts = new(); // teamID → whoAmI
 
         public static void RegisterTeamHost(int team, int playerId)
         {
             if (!teamHosts.ContainsKey(team))
-            {
                 teamHosts[team] = playerId;
-            }
         }
 
         public static int? GetTeamHost(int team)
-        {
-            return teamHosts.TryGetValue(team, out int playerId) ? playerId : (int?)null;
-        }
+            => teamHosts.TryGetValue(team, out var id) ? id : (int?)null;
 
         public static bool IsTeamHost(int team, int playerId)
-        {
-            return GetTeamHost(team) == playerId;
-        }
+            => GetTeamHost(team) == playerId;
 
-        public static void Reset()
-        {
-            teamHosts.Clear();
-        }
+        public static void Reset() 
+            => teamHosts.Clear();
     }
+}
