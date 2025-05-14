@@ -1,1 +1,1 @@
-Modify this file with a description of your mod.
+Unified Inventory is a multiplayer-focused mod that enables team-based shared inventories in Terraria. Instead of each player managing their own inventory, players on the same team (Red, Green, Blue, Yellow, Pink, or White) automatically access and use a synchronized inventory pool shared among all teammates.
