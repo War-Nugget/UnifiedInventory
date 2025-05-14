@@ -10,6 +10,7 @@ namespace UnifiedInventory.SharedInventory.UI
 {
     public class SharedInventoryUI : UIState
     {
+        
         private UIItemSlot[] slots;
         private Item[] sharedItems;       // ← declare the backing array here
 
@@ -19,12 +20,13 @@ namespace UnifiedInventory.SharedInventory.UI
         private const int SlotSize = 50;
         private const int Padding  = 5;
 
-        public static object Instance { get; internal set; }
+        public static SharedInventoryUI Instance { get; private set; }
+
 
         public override void OnInitialize()
         {
             base.OnInitialize();
-
+            Instance = this;
             // 1) Grab your InventorySlotData[] for the current team
             int teamID = Main.LocalPlayer.team;
             if (teamID <= 0)
@@ -57,6 +59,10 @@ namespace UnifiedInventory.SharedInventory.UI
                 Append(slot);
                 slots[i] = slot;
             }
+        }
+        public void Refresh() {
+            RemoveAllChildren();
+            OnInitialize();
         }
 
         private void Slot_OnClick(UIMouseEvent evt, UIElement listeningElement)

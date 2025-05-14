@@ -19,22 +19,23 @@ namespace UnifiedInventory
 {
     public class UnifiedInventory : Mod
     {
-		public override void HandlePacket(BinaryReader reader, int whoAmI) {
-			ModContent
-			.GetInstance<InventoryNetworkSystem>()
-			.ReceivePacket(reader, whoAmI);
-		}
+    public override void HandlePacket(BinaryReader reader, int whoAmI)
+    {
+        ModContent
+          .GetInstance<InventoryNetworkSystem>()
+          .ReceivePacket(reader, whoAmI);
+    }
 
 
 
-        public override void Load()
-        {
-            // any global setup you need
-        }
+        // public override void Load()
+        // {
+        //     // any global setup you need
+        // }
 
-        public override void Unload()
-        {
-            // clean up static refs if necessary
-        }
+        // public override void Unload()
+        // {
+        //     // clean up static refs if necessary
+        // }
     }
 }

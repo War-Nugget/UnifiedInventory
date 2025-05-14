@@ -64,77 +64,77 @@ namespace UnifiedInventory.SharedInventory.Network
             packet.Send();
         }
 
-        public override void HandlePacket(BinaryReader reader, int whoAmI)
+        public void ReceivePacket(BinaryReader reader, int whoAmI)
         {
             var msg = (PacketType)reader.ReadByte();
             switch (msg)
             {
                 case PacketType.RequestFullSync:
-                    {
-                        if (Main.netMode != NetmodeID.Server) return;
-                        int team = reader.ReadInt32();
-                        SendInventory(team, toClient: whoAmI);
-                        break;
-                    }
+                {
+                    if (Main.netMode != NetmodeID.Server) return;
+                    int team = reader.ReadInt32();
+                    SendInventory(team, toClient: whoAmI);
+                    break;
+                }
 
                 case PacketType.SyncInventory:
+                {
+                    // both server (rarely) and clients could technically receive this,
+                    // but we only act on it in clients:
+                    if (Main.netMode != NetmodeID.MultiplayerClient) return;
+
+                    int team   = reader.ReadByte();
+                    int length = reader.ReadByte();
+                    if (!TeamInventorySystem.TeamInventories.TryGetValue(team, out var arr))
+                        return;
+
+                    for (int i = 0; i < length && i < arr.Length; i++)
                     {
-                        // both server (rarely) and clients could technically receive this,
-                        // but we only act on it in clients:
-                        if (Main.netMode != NetmodeID.MultiplayerClient) return;
-
-                        int team   = reader.ReadByte();
-                        int length = reader.ReadByte();
-                        if (!TeamInventorySystem.TeamInventories.TryGetValue(team, out var arr))
-                            return;
-
-                        for (int i = 0; i < length && i < arr.Length; i++)
-                        {
-                            byte slotIndex = reader.ReadByte();
-                            var item = new Item();
-                            ItemIO.Receive(item, reader, readStack: true, readFavorite: true);
-
-                            // assign into the existing slot rather than replace it
-                            arr[slotIndex].Item = item;
-                        }
-
-                        SharedInventoryUI.Instance?.Refresh();   // force UI redraw
-                        break;
-                    }
-
-                case PacketType.ModifySlot:
-                    {
-                        int team      = reader.ReadInt32();
-                        int slotIndex = reader.ReadInt32();
-                        var item      = new Item();
+                        byte slotIndex = reader.ReadByte();
+                        var item = new Item();
                         ItemIO.Receive(item, reader, readStack: true, readFavorite: true);
 
-                        if (Main.netMode == NetmodeID.Server)
-                        {
-                            // sanity: only accept from correct-team players
-                            var sender = Main.player[whoAmI];
-                            if (sender.team != team) return;
-
-                            // server updates its master copy…
-                            TeamInventorySystem.TeamInventories[team][slotIndex].Item = item;
-
-                            // …and rebroadcasts to everyone (including origin)
-                            var rebroadcast = ModContent.GetInstance<UnifiedInventory>()
-                                                        .GetPacket();
-                            rebroadcast.Write((byte)PacketType.ModifySlot);
-                            rebroadcast.Write(team);
-                            rebroadcast.Write(slotIndex);
-                            ItemIO.Send(item, rebroadcast, writeStack: true, writeFavorite: true);
-                            rebroadcast.Send(toClient: -1, ignoreClient: whoAmI);
-                        }
-                        else
-                        {
-                            // client just updates its local mirror
-                            TeamInventorySystem.TeamInventories[team][slotIndex].Item = item;
-                            SharedInventoryUI.Instance?.Refresh();
-                        }
-                        break;
+                        // assign into the existing slot rather than replace it
+                        arr[slotIndex].Item = item;
                     }
+
+                    SharedInventoryUI.Instance?.Refresh();   // force UI redraw
+                    break;
+                }
+
+                case PacketType.ModifySlot:
+                {
+                    int team      = reader.ReadInt32();
+                    int slotIndex = reader.ReadInt32();
+                    var item      = new Item();
+                    ItemIO.Receive(item, reader, readStack: true, readFavorite: true);
+
+                    if (Main.netMode == NetmodeID.Server)
+                    {
+                        // sanity: only accept from correct-team players
+                        var sender = Main.player[whoAmI];
+                        if (sender.team != team) return;
+
+                        // server updates its master copy…
+                        TeamInventorySystem.TeamInventories[team][slotIndex].Item = item;
+
+                        // …and rebroadcasts to everyone (including origin)
+                        var rebroadcast = ModContent.GetInstance<UnifiedInventory>()
+                                                    .GetPacket();
+                        rebroadcast.Write((byte)PacketType.ModifySlot);
+                        rebroadcast.Write(team);
+                        rebroadcast.Write(slotIndex);
+                        ItemIO.Send(item, rebroadcast, writeStack: true, writeFavorite: true);
+                        rebroadcast.Send(toClient: -1, ignoreClient: whoAmI);
+                    }
+                    else
+                    {
+                        // client just updates its local mirror
+                        TeamInventorySystem.TeamInventories[team][slotIndex].Item = item;
+                        SharedInventoryUI.Instance?.Refresh();
+                    }
+                    break;
+                }
             }
         }
     }
