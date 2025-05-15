@@ -20,7 +20,7 @@ namespace UnifiedInventory.SharedInventory.UI
         private const int SlotSize = 50;
         private const int Padding  = 5;
 
-        public static SharedInventoryUI Instance { get; private set; }
+        public static SharedInventoryUI Instance { get; set; }
 
 
         public override void OnInitialize()

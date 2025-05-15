@@ -39,15 +39,11 @@ namespace UnifiedInventory.SharedInventory.Systems
         {
             // turn each TeamInventories entry into a TagCompound
             var list = new List<TagCompound>();
-            foreach (var kvp in TeamInventories)
-            {
-                list.Add(new TagCompound {
-                    ["teamID"] = kvp.Key,
-                    ["items"] = kvp.Value
-                    .Select(slot => ItemIO.Save(slot.Item))
-                    .ToList()
-                });
-            }
+            tag["sharedInventories"] = TeamInventories
+            .Select(kvp => new TagCompound {
+                ["teamID"] = kvp.Key,
+                ["slots"]  = kvp.Value.Select(slot => slot.Save()).ToList()
+            }).ToList();
             tag["sharedInventories"] = list;
         }
 
@@ -61,7 +57,7 @@ namespace UnifiedInventory.SharedInventory.Systems
             foreach (var tc in tag.GetList<TagCompound>("sharedInventories"))
             {
                 int teamID = tc.GetInt("teamID");
-                var saved = tc.GetList<TagCompound>("items");
+                var saved = tc.GetList<TagCompound>("slots");
                 var slots = new InventorySlotData[MaxSlots];
                 for (int i = 0; i < MaxSlots; i++)
                 {

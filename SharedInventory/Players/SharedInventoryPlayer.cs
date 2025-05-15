@@ -24,7 +24,7 @@ namespace UnifiedInventory.SharedInventory.Players
                 {
                     SeedSharedArray();
                     lastInventorySnapshot = CloneInventory(Player.inventory);
-                    InventoryNetworkSystem.SendInventory(Player);
+                    InventoryNetworkSystem.SendInventory(Player.team);
                 }
             }
 
@@ -34,7 +34,7 @@ namespace UnifiedInventory.SharedInventory.Players
                 if (InventoryChanged())
                 {
                     SeedSharedArray();
-                    InventoryNetworkSystem.SendInventory(Player);
+                    InventoryNetworkSystem.SendInventory(Player.team);
                     lastInventorySnapshot = CloneInventory(Player.inventory);
                 }
             }
@@ -103,5 +103,7 @@ namespace UnifiedInventory.SharedInventory.Players
             5 => Color.Purple,
             _ => Color.White
         };
+
+       
     }
 }

@@ -1,41 +1,68 @@
-using System;
-using Terraria;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria.ModLoader;
-
-using UnifiedInventory.SharedInventory.Utils;
-using UnifiedInventory.SharedInventory.Database;
-using UnifiedInventory.SharedInventory.Systems;
-using UnifiedInventory.SharedInventory.Network;
-
 using System.IO;
-
-
+using Terraria;
+using Terraria.ModLoader;
+using Terraria.UI;
+using UnifiedInventory.SharedInventory.Network;
+using UnifiedInventory.SharedInventory.UI;
 
 namespace UnifiedInventory
 {
     public class UnifiedInventory : Mod
     {
-    public override void HandlePacket(BinaryReader reader, int whoAmI)
-    {
-        ModContent
-          .GetInstance<InventoryNetworkSystem>()
-          .ReceivePacket(reader, whoAmI);
-    }
+        public static UnifiedInventory Instance { get; private set; }
+        private UserInterface _sharedInterface;
 
+        public override void Load()
+        {
+            // Set up our UIState
+            Instance = this;
+            _sharedInterface = new UserInterface();
+            _sharedInterface.SetState(new SharedInventoryUI());
+        }
 
+        public override void Unload()
+        {
+            // Tear down to avoid leaks on reload
+            Instance = null;
+            SharedInventoryUI.Instance = null;
+            _sharedInterface = null;
+        }
 
-        // public override void Load()
-        // {
-        //     // any global setup you need
-        // }
+        public override void HandlePacket(BinaryReader reader, int whoAmI)
+        {
+            ModContent.GetInstance<InventoryNetworkSystem>()
+                      .ReceivePacket(reader, whoAmI);
+        }
 
-        // public override void Unload()
-        // {
-        //     // clean up static refs if necessary
-        // }
+        // ───────────────────────────────────────────────────────────────────────────
+        // 1) This runs *before* each draw tick, to let our UIState update logic run.
+        public void UpdateUI(GameTime gameTime)
+        {
+            // Only update when we actually have a UI to draw
+            _sharedInterface?.Update(gameTime);
+        }
+
+        // ───────────────────────────────────────────────────────────────────────────
+        // 2) This injects our UI draw call into Terraria's interface layers.
+        public void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
+        {
+            // Find where the vanilla inventory is drawn
+            int inventoryIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Inventory"));
+            if (inventoryIndex != -1)
+            {
+                layers.Insert(inventoryIndex, new LegacyGameInterfaceLayer(
+                    "UnifiedInventory: Shared UI",
+                    () =>
+                    {
+                        // Draw our UIState on top of the vanilla inventory
+                        _sharedInterface.Draw(Main.spriteBatch, new GameTime());
+                        return true;
+                    },
+                    InterfaceScaleType.UI)
+                );
+            }
+        }
     }
 }
