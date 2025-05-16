@@ -3,6 +3,7 @@ using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
 using UnifiedInventory.SharedInventory.Systems;
 using UnifiedInventory.SharedInventory.Network;
+using UnifiedInventory.SharedInventory.UI;
 
 namespace UnifiedInventory.SharedInventory.Players
 {
@@ -26,6 +27,9 @@ namespace UnifiedInventory.SharedInventory.Players
                     lastInventorySnapshot = CloneInventory(Player.inventory);
                     InventoryNetworkSystem.SendInventory(Player.team);
                 }
+
+                //Refresh the UI
+                SharedInventoryUI.Instance?.Refresh();
             }
 
             // 2) If *we* are the host, watch for local changes and re-broadcast

@@ -55,6 +55,7 @@ namespace UnifiedInventory.SharedInventory.UI
                 // subscribe to click events
                     slot.OnLeftClick  += Slot_OnClick;
                     slot.OnRightClick += Slot_OnClick; // optional
+                    Main.NewText("[DEBUG] Slot_OnClick triggered", Microsoft.Xna.Framework.Color.Yellow);
 
 
                 Append(slot);
@@ -68,6 +69,7 @@ namespace UnifiedInventory.SharedInventory.UI
 
         private void Slot_OnClick(UIMouseEvent evt, UIElement listeningElement)
         {
+            Main.NewText("[Debug] Slot_OnClick was called!");
             int index = Array.IndexOf(slots, (UIItemSlot)listeningElement);
             if (index < 0) return;
 
@@ -92,7 +94,7 @@ namespace UnifiedInventory.SharedInventory.UI
             //     Main.LocalPlayer.inventory,
             //     TeamInventorySystem.TeamInventories[Main.LocalPlayer.team]
             // );
-            
+            Main.NewText($"[Debug] Sent slot change for team {Main.LocalPlayer.team}, slot {index}");
 
             //  change in the player's local inventory
             Main.LocalPlayer.inventory[index] = clickedItem.Clone();

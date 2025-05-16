@@ -4,7 +4,8 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using UnifiedInventory.SharedInventory.Systems;
-using UnifiedInventory.SharedInventory.UI; // for UI refresh hook
+using UnifiedInventory.SharedInventory.UI;
+using UnifiedInventory.SharedInventory.Utils; // for UI refresh hook
 
 namespace UnifiedInventory.SharedInventory.Network
 {
@@ -12,8 +13,8 @@ namespace UnifiedInventory.SharedInventory.Network
     {
         public enum PacketType : byte
         {
-            SyncInventory   = 0,
-            ModifySlot      = 1,
+            SyncInventory = 0,
+            ModifySlot = 1,
             RequestFullSync = 2    // new: clients ask server for full refresh
         }
 
@@ -43,8 +44,7 @@ namespace UnifiedInventory.SharedInventory.Network
         /// </summary>
         public static void SendSlotChange(int teamID, int slotIndex, Item item)
         {
-            var packet = ModContent.GetInstance<UnifiedInventory>()
-                                   .GetPacket();
+            var packet = ModContent.GetInstance<UnifiedInventory>().GetPacket();
             packet.Write((byte)PacketType.ModifySlot);
             packet.Write(teamID);
             packet.Write(slotIndex);
@@ -57,8 +57,7 @@ namespace UnifiedInventory.SharedInventory.Network
         /// </summary>
         public static void RequestFullSync(int teamID)
         {
-            var packet = ModContent.GetInstance<UnifiedInventory>()
-                                   .GetPacket();
+            var packet = ModContent.GetInstance<UnifiedInventory>().GetPacket();
             packet.Write((byte)PacketType.RequestFullSync);
             packet.Write(teamID);
             packet.Send();
@@ -104,9 +103,9 @@ namespace UnifiedInventory.SharedInventory.Network
 
                 case PacketType.ModifySlot:
                 {
-                    int team      = reader.ReadInt32();
+                    int team = reader.ReadInt32();
                     int slotIndex = reader.ReadInt32();
-                    var item      = new Item();
+                    var item = new Item();
                     ItemIO.Receive(item, reader, readStack: true, readFavorite: true);
 
                     if (Main.netMode == NetmodeID.Server)
@@ -119,8 +118,7 @@ namespace UnifiedInventory.SharedInventory.Network
                         TeamInventorySystem.TeamInventories[team][slotIndex].Item = item;
 
                         // …and rebroadcasts to everyone (including origin)
-                        var rebroadcast = ModContent.GetInstance<UnifiedInventory>()
-                                                    .GetPacket();
+                        var rebroadcast = ModContent.GetInstance<UnifiedInventory>().GetPacket();
                         rebroadcast.Write((byte)PacketType.ModifySlot);
                         rebroadcast.Write(team);
                         rebroadcast.Write(slotIndex);
@@ -129,8 +127,20 @@ namespace UnifiedInventory.SharedInventory.Network
                     }
                     else
                     {
-                        // client just updates its local mirror
+                        
                         TeamInventorySystem.TeamInventories[team][slotIndex].Item = item;
+
+
+                            if (Main.LocalPlayer.team == team)
+                            {
+                                InventoryUtils.ApplySlotData(
+                                    Main.LocalPlayer.inventory,
+                                    TeamInventorySystem.TeamInventories[team]
+                                );
+                             Main.NewText($"[Client Sync] Updated slot {slotIndex} for Team {team}", Microsoft.Xna.Framework.Color.LightGreen);
+
+                        }
+
                         SharedInventoryUI.Instance?.Refresh();
                     }
                     break;
