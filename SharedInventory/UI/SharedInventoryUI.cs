@@ -15,7 +15,7 @@ namespace UnifiedInventory.SharedInventory.UI
         private Item[] sharedItems;       // ← declare the backing array here
 
         // layout constants
-        private const int Rows     = 4;
+        private const int Rows     = 5;
         private const int Columns  = 10;
         private const int SlotSize = 50;
         private const int Padding  = 5;
@@ -79,12 +79,9 @@ namespace UnifiedInventory.SharedInventory.UI
             // pull the Item out of our sharedItems[] backing array
             Item clickedItem = sharedItems[index];
 
-            // fire the network update for that one slot
-            InventoryNetworkSystem.SendSlotChange(
-                Main.LocalPlayer.team,
-                index,
-                clickedItem
-            );
+            //uppdate local shared array too 
+            TeamInventorySystem.TeamInventories[Main.LocalPlayer.team][index].Item = clickedItem.Clone();
+            
         }
     }
 }

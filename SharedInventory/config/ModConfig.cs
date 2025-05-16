@@ -17,5 +17,11 @@ namespace UnifiedInventory.SharedInventory.Config
         [Tooltip("Enable or disable the shared inventory system entirely.")]
         [DefaultValue(true)]
         public bool EnableSharedInventory { get; set; }
+
+        [Label("Force Host Inventory on Clients")]
+        [Tooltip("When enabled, non-host players' inventories will always be overwritten by the host's shared inventory.")]
+        [DefaultValue(true)]
+        public bool ForceHostInventory { get; set; }
+
     }
 }

@@ -15,7 +15,7 @@ namespace UnifiedInventory.SharedInventory.Systems
             if (!config.EnableSharedInventory)
                 return;
 
-            syncTimer += 1.0 / 60.0;                    // accumulate seconds
+            syncTimer += 1.0 / 60.0;  // accumulate seconds
             if (syncTimer < config.SyncIntervalSeconds)
                 return;
             syncTimer = 0;
@@ -29,13 +29,25 @@ namespace UnifiedInventory.SharedInventory.Systems
             if (!hostId.HasValue || TeamSyncTracker.IsTeamHost(team, Main.myPlayer))
                 return;
 
+            if (!config.ForceHostInventory)
+                return;
+
             if (!TeamInventorySystem.TeamInventories.TryGetValue(team, out var slots))
                 return;
 
-            // Overwrite the local inventory with the shared slots
-            for (int i = 0; i < Main.LocalPlayer.inventory.Length && i < slots.Length; i++)
-                Main.LocalPlayer.inventory[i] = slots[i].Item.Clone();
+            // Only overwrite slots that have changed
+            var inventory = Main.LocalPlayer.inventory;
+            for (int i = 0; i < inventory.Length && i < slots.Length; i++)
+            {
+                var local = inventory[i];
+                var shared = slots[i].Item;
+
+                // Compare by netID, stack, and prefix before cloning
+                if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+                {
+                    inventory[i] = shared.Clone();
+                }
+            }
         }
     }
 }
- 
