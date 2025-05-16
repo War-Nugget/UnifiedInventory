@@ -76,12 +76,18 @@ namespace UnifiedInventory.SharedInventory.UI
                 return;
             }
 
-            // pull the Item out of our sharedItems[] backing array
             Item clickedItem = sharedItems[index];
 
-            //uppdate local shared array too 
+            // Update shared inventory locally (optimistic update)
             TeamInventorySystem.TeamInventories[Main.LocalPlayer.team][index].Item = clickedItem.Clone();
-            
+
+            // 🔥 This was missing — send the change to the server so it rebroadcasts
+            InventoryNetworkSystem.SendSlotChange(
+                Main.LocalPlayer.team,
+                index,
+                clickedItem
+            );
         }
+
     }
 }

@@ -11,5 +11,10 @@ Configs: {
 			Label: Enable Shared Inventory
 			Tooltip: Enable or disable the shared inventory system entirely.
 		}
+
+		ForceHostInventory: {
+			Label: Force Host Inventory on Clients
+			Tooltip: When enabled, non-host players' inventories will always be overwritten by the host's shared inventory.
+		}
 	}
 }

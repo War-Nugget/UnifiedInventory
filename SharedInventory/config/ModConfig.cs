@@ -20,7 +20,7 @@ namespace UnifiedInventory.SharedInventory.Config
 
         [Label("Force Host Inventory on Clients")]
         [Tooltip("When enabled, non-host players' inventories will always be overwritten by the host's shared inventory.")]
-        [DefaultValue(true)]
+        [DefaultValue(false)]
         public bool ForceHostInventory { get; set; }
 
     }
