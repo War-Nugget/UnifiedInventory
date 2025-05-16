@@ -5,6 +5,7 @@ using Terraria.UI;
 using Terraria.GameContent.UI.Elements;
 using UnifiedInventory.SharedInventory.Systems;
 using UnifiedInventory.SharedInventory.Network;
+using UnifiedInventory.SharedInventory.Utils;
 
 namespace UnifiedInventory.SharedInventory.UI
 {
@@ -78,15 +79,23 @@ namespace UnifiedInventory.SharedInventory.UI
 
             Item clickedItem = sharedItems[index];
 
-            // Update shared inventory locally (optimistic update)
+            // Update shared inventory memory
             TeamInventorySystem.TeamInventories[Main.LocalPlayer.team][index].Item = clickedItem.Clone();
 
-            // 🔥 This was missing — send the change to the server so it rebroadcasts
+            // Send to server
             InventoryNetworkSystem.SendSlotChange(
                 Main.LocalPlayer.team,
                 index,
                 clickedItem
             );
+            //     InventoryUtils.ApplySlotData(
+            //     Main.LocalPlayer.inventory,
+            //     TeamInventorySystem.TeamInventories[Main.LocalPlayer.team]
+            // );
+            
+
+            //  change in the player's local inventory
+            Main.LocalPlayer.inventory[index] = clickedItem.Clone();
         }
 
     }
