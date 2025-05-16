@@ -6,6 +6,7 @@ using Terraria.GameContent.UI.Elements;
 using UnifiedInventory.SharedInventory.Systems;
 using UnifiedInventory.SharedInventory.Network;
 using UnifiedInventory.SharedInventory.Utils;
+using System.Drawing;
 
 namespace UnifiedInventory.SharedInventory.UI
 {
@@ -85,6 +86,8 @@ namespace UnifiedInventory.SharedInventory.UI
             TeamInventorySystem.TeamInventories[Main.LocalPlayer.team][index].Item = clickedItem.Clone();
 
             // Send to server
+            Main.NewText($"[DEBUG] Calling SendSlotChange for team {Main.LocalPlayer.team}, slot {index}",  Microsoft.Xna.Framework.Color.LightBlue);
+
             InventoryNetworkSystem.SendSlotChange(
                 Main.LocalPlayer.team,
                 index,

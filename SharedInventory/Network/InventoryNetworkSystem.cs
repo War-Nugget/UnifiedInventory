@@ -1,3 +1,5 @@
+using System;
+using System.Drawing;
 using System.IO;
 using Terraria;
 using Terraria.ID;
@@ -18,30 +20,37 @@ namespace UnifiedInventory.SharedInventory.Network
             RequestFullSync = 2    // new: clients ask server for full refresh
         }
 
-        /// <summary>
+        
         /// Broadcast the full shared‐inventory for a given team.
-        /// </summary>
+       
         public static void SendInventory(int teamID, int toClient = -1, int ignoreClient = -1)
         {
             if (!TeamInventorySystem.TeamInventories.TryGetValue(teamID, out var slots))
                 return;
 
-            var packet = ModContent.GetInstance<UnifiedInventory>()
-                                   .GetPacket();
+            var packet = ModContent.GetInstance<UnifiedInventory>().GetPacket();
             packet.Write((byte)PacketType.SyncInventory);
-            packet.Write((byte)teamID);                      // now include teamID
+            packet.Write((byte)teamID); // now include teamID
             packet.Write((byte)slots.Length);
+
             foreach (var slot in slots)
             {
                 packet.Write((byte)slot.SlotIndex);
                 ItemIO.Send(slot.Item, packet, writeStack: true, writeFavorite: true);
             }
+
+            // 🧪 Debug: Confirm we're sending the inventory sync
+            string target = toClient == -1 ? "all clients" : $"client {toClient}";
+            Main.NewText($"[SERVER] Sending full inventory sync for Team {teamID} to {target}", 
+                        Microsoft.Xna.Framework.Color.LightBlue);
+
             packet.Send(toClient, ignoreClient);
         }
 
-        /// <summary>
+
+    
         /// Tell the server “I changed one slot of my team.”
-        /// </summary>
+
         public static void SendSlotChange(int teamID, int slotIndex, Item item)
         {
             var packet = ModContent.GetInstance<UnifiedInventory>().GetPacket();
@@ -68,13 +77,15 @@ namespace UnifiedInventory.SharedInventory.Network
             var msg = (PacketType)reader.ReadByte();
             switch (msg)
             {
-                case PacketType.RequestFullSync:
-                {
-                    if (Main.netMode != NetmodeID.Server) return;
-                    int team = reader.ReadInt32();
-                    SendInventory(team, toClient: whoAmI);
-                    break;
-                }
+        case PacketType.RequestFullSync:
+        {
+            if (Main.netMode != NetmodeID.Server) return;
+            int team = reader.ReadInt32();
+            Main.NewText($"[SERVER] Received RequestFullSync from player {Main.player[whoAmI].name} for Team {team}", Microsoft.Xna.Framework.Color.Orange);
+            SendInventory(team, toClient: whoAmI);
+            break;
+        }
+
 
                 case PacketType.SyncInventory:
                 {
