@@ -42,26 +42,5 @@ namespace UnifiedInventory
             // Only update when we actually have a UI to draw
             _sharedInterface?.Update(gameTime);
         }
-
-        // ───────────────────────────────────────────────────────────────────────────
-        // 2) This injects our UI draw call into Terraria's interface layers.
-        // public void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
-        // {
-        //     // Find where the vanilla inventory is drawn
-        //     int inventoryIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Inventory"));
-        //     if (inventoryIndex != -1)
-        //     {
-        //         layers.Insert(inventoryIndex, new LegacyGameInterfaceLayer(
-        //             "UnifiedInventory: Shared UI",
-        //             () =>
-        //             {
-        //                 // Draw our UIState on top of the vanilla inventory
-        //                 _sharedInterface.Draw(Main.spriteBatch, new GameTime());
-        //                 return true;
-        //             },
-        //             InterfaceScaleType.UI)
-        //         );
-        //     }
-        // }
     }
 }

@@ -44,18 +44,23 @@ namespace UnifiedInventory.SharedInventory.Players
             }
         }
 
-        public override void OnEnterWorld()
+        public void OnEnterWorld(Player player)
         {
-            if (Player.team > 0 && !TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
+            if (player.whoAmI == Main.myPlayer && player.team > 0)
             {
-                // Non-hosts wait for the SyncInventory packet to populate their UI
-                Main.NewText(
-                    $"[SharedInventory] Synced inventory for Team {GetTeamName(Player.team)}",
-                    GetTeamColor(Player.team)
-                );
-                InventoryNetworkSystem.RequestFullSync(Player.team);
+                // create + initialize your SharedInventoryUI exactly once
+                if (SharedInventoryUI.Instance == null)
+                {
+                    var ui = new SharedInventoryUI();
+                    ui.Activate();        // this wires up the UIItemSlots
+                    ui.OnInitialize();    // sets Instance=this, builds your slots array
+                }
+
+                // now you can request the full sync…
+                InventoryNetworkSystem.RequestFullSync(player.team);
             }
         }
+
 
         private void SeedSharedArray()
         {
