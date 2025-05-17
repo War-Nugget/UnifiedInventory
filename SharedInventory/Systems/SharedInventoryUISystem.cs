@@ -13,9 +13,9 @@ namespace UnifiedInventory.SharedInventory.Systems
             UnifiedInventory.Instance?.UpdateUI(gameTime);
         }
 
-        public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
-        {
-            UnifiedInventory.Instance?.ModifyInterfaceLayers(layers);
-        }
+        // public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
+        // {
+        //     UnifiedInventory.Instance?.ModifyInterfaceLayers(layers);
+        // }
     }
 }

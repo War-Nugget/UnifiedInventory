@@ -20,26 +20,26 @@ namespace UnifiedInventory.SharedInventory.Systems
         /// <summary>
         /// teamID → that team’s shared-inventory slots
         /// </summary>
-        public static Dictionary<int, InventorySlotData[]> TeamInventories = new();
+        public static Dictionary<int, InventorySlotData[]> SharedInventories = new();
 
         public override void OnWorldLoad()
         {
             // initialize fresh empty arrays for every team
-            TeamInventories.Clear();
+            SharedInventories.Clear();
             for (int team = 0; team < MaxTeams; team++)
             {
                 var slots = new InventorySlotData[MaxSlots];
                 for (int i = 0; i < MaxSlots; i++)
                     slots[i] = new InventorySlotData(i, null);
-                TeamInventories[team] = slots;
+                SharedInventories[team] = slots;
             }
         }
 
         public override void SaveWorldData(TagCompound tag)
         {
-            // turn each TeamInventories entry into a TagCompound
+            // turn each SharedInventories entry into a TagCompound
             var list = new List<TagCompound>();
-            tag["sharedInventories"] = TeamInventories
+            tag["sharedInventories"] = SharedInventories
             .Select(kvp => new TagCompound {
                 ["teamID"] = kvp.Key,
                 ["slots"]  = kvp.Value.Select(slot => slot.Save()).ToList()
@@ -65,7 +65,7 @@ namespace UnifiedInventory.SharedInventory.Systems
                     var item     = itemData is null ? new Item() : ItemIO.Load(itemData);
                     slots[i]     = new InventorySlotData(i, item);
                 }
-                TeamInventories[teamID] = slots;
+                SharedInventories[teamID] = slots;
             }
         }
     }

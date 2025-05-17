@@ -25,7 +25,7 @@ namespace UnifiedInventory.SharedInventory.Network
        
         public static void SendInventory(int teamID, int toClient = -1, int ignoreClient = -1)
         {
-            if (!TeamInventorySystem.TeamInventories.TryGetValue(teamID, out var slots))
+            if (!TeamInventorySystem.SharedInventories.TryGetValue(teamID, out var slots))
                 return;
 
             var packet = ModContent.GetInstance<UnifiedInventory>().GetPacket();
@@ -95,7 +95,7 @@ namespace UnifiedInventory.SharedInventory.Network
 
                     int team   = reader.ReadByte();
                     int length = reader.ReadByte();
-                    if (!TeamInventorySystem.TeamInventories.TryGetValue(team, out var arr))
+                    if (!TeamInventorySystem.SharedInventories.TryGetValue(team, out var arr))
                         return;
 
                     for (int i = 0; i < length && i < arr.Length; i++)
@@ -126,7 +126,7 @@ namespace UnifiedInventory.SharedInventory.Network
                         if (sender.team != team) return;
 
                         // server updates its master copy…
-                        TeamInventorySystem.TeamInventories[team][slotIndex].Item = item;
+                        TeamInventorySystem.SharedInventories[team][slotIndex].Item = item;
 
                         // …and rebroadcasts to everyone (including origin)
                         var rebroadcast = ModContent.GetInstance<UnifiedInventory>().GetPacket();
@@ -139,14 +139,14 @@ namespace UnifiedInventory.SharedInventory.Network
                     else
                     {
                         
-                        TeamInventorySystem.TeamInventories[team][slotIndex].Item = item;
+                        TeamInventorySystem.SharedInventories[team][slotIndex].Item = item;
 
 
                             if (Main.LocalPlayer.team == team)
                             {
                                 InventoryUtils.ApplySlotData(
                                     Main.LocalPlayer.inventory,
-                                    TeamInventorySystem.TeamInventories[team]
+                                    TeamInventorySystem.SharedInventories[team]
                                 );
                              Main.NewText($"[Client Sync] Updated slot {slotIndex} for Team {team}", Microsoft.Xna.Framework.Color.LightGreen);
 

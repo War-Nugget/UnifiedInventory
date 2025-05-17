@@ -53,12 +53,13 @@ namespace UnifiedInventory.SharedInventory.Players
                     $"[SharedInventory] Synced inventory for Team {GetTeamName(Player.team)}",
                     GetTeamColor(Player.team)
                 );
+                InventoryNetworkSystem.RequestFullSync(Player.team);
             }
         }
 
         private void SeedSharedArray()
         {
-            var sharedSlots = TeamInventorySystem.TeamInventories[Player.team];
+            var sharedSlots = TeamInventorySystem.SharedInventories[Player.team];
             // Copy each slot from Player.inventory → sharedSlots[i].Item
             for (int i = 0; i < Player.inventory.Length && i < sharedSlots.Length; i++)
                 sharedSlots[i].Item = Player.inventory[i].Clone();
