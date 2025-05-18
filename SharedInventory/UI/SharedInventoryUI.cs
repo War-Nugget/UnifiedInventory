@@ -7,6 +7,7 @@ using UnifiedInventory.SharedInventory.Systems;
 using UnifiedInventory.SharedInventory.Network;
 
 using UnifiedInventory.SharedInventory.Database;
+using Microsoft.Xna.Framework;
 
 namespace UnifiedInventory.SharedInventory.UI
 {
@@ -15,7 +16,9 @@ namespace UnifiedInventory.SharedInventory.UI
 
         private UIItemSlot[] slots;
         private Item[] sharedItems;       // ← declare the backing array here
+        private Item[] previousItems;
         private InventorySlotData[] slotData;
+        
 
         // layout constants
         private const int Rows = 5;
@@ -23,11 +26,15 @@ namespace UnifiedInventory.SharedInventory.UI
         private const int SlotSize = 50;
         private const int Padding = 5;
 
+        
+
         public static SharedInventoryUI Instance { get; set; }
 
 
         public override void OnInitialize()
         {
+            
+
             base.OnInitialize();
             Instance = this;
             // 1) Grab your InventorySlotData[] for the current team
@@ -41,9 +48,9 @@ namespace UnifiedInventory.SharedInventory.UI
             this.slotData = TeamInventorySystem.SharedInventories[teamID];
 
             // 2) Extract the Item[] that UIItemSlot needs
-            sharedItems = this.slotData
-                .Select(s => s.Item)
-                .ToArray();
+            sharedItems = this.slotData.Select(s => s.Item).ToArray();
+
+            previousItems = sharedItems.Select(item => item.Clone()).ToArray();
 
             // 3) Create a UIItemSlot for each array index
             slots = new UIItemSlot[Rows * Columns];
@@ -76,14 +83,14 @@ namespace UnifiedInventory.SharedInventory.UI
             // 2) Re-bind slotData & sharedItems from the live system, or empty if no team
             if (teamID > 0 && TeamInventorySystem.SharedInventories.TryGetValue(teamID, out var freshData))
             {
-                this.slotData   = freshData;
-                sharedItems     = this.slotData.Select(s => s.Item).ToArray();
+                this.slotData = freshData;
+                sharedItems = this.slotData.Select(s => s.Item).ToArray();
             }
             else
             {
                 // Not on a team: clear out
-                this.slotData   = Array.Empty<InventorySlotData>();
-                sharedItems     = Array.Empty<Item>();
+                this.slotData = Array.Empty<InventorySlotData>();
+                sharedItems = Array.Empty<Item>();
             }
             OnInitialize();
         }
@@ -91,18 +98,18 @@ namespace UnifiedInventory.SharedInventory.UI
 
 
         private void Slot_OnClick(UIMouseEvent evt, UIElement listeningElement)
-        {   
+        {
             int index = Array.IndexOf(slots, (UIItemSlot)listeningElement);
             if (index < 0 || Main.LocalPlayer.team <= 0) return;
 
             // What the player is holding (hotbar pickup or placing into slot)
             Item held = Main.mouseItem;
             // What used to live in this shared slot
-            Item old  = slotData[index].Item.Clone();
+            Item old = slotData[index].Item.Clone();
 
             // 1) Swap them
-            slotData[index].Item    = held.Clone();    // write into the real shared data
-            Main.mouseItem          = old;             // give the player back whatever was here
+            slotData[index].Item = held.Clone();    // write into the real shared data
+            Main.mouseItem = old;             // give the player back whatever was here
             Main.LocalPlayer.inventory[index] = slotData[index].Item.Clone();
 
             // 2) Broadcast the change
@@ -114,6 +121,33 @@ namespace UnifiedInventory.SharedInventory.UI
 
             // 3) Immediately rebuild the UI so it shows the new item
             Refresh();
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            int teamID = Main.LocalPlayer.team;
+            if (teamID <= 0 || slotData == null || sharedItems == null || previousItems == null)
+                return;
+
+            for (int i = 0; i < sharedItems.Length; i++)
+            {
+                if (!ItemEquals(sharedItems[i], previousItems[i]))
+                {
+                    // Send updated item
+                    InventoryNetworkSystem.SendSlotChange(teamID, i, sharedItems[i]);
+                    previousItems[i] = sharedItems[i].Clone();  // update cached state
+                }
+            }
+        }
+
+        // Utility function to compare items safely
+        private bool ItemEquals(Item a, Item b)
+        {
+            return a?.type == b?.type &&
+                a?.stack == b?.stack &&
+                a?.prefix == b?.prefix;
         }
 
     }

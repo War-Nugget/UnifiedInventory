@@ -2,50 +2,56 @@ using Terraria;
 using Terraria.ModLoader;
 using UnifiedInventory.SharedInventory.Config;
 using UnifiedInventory.SharedInventory.Systems; // for TeamSyncTracker & TeamInventorySystem
+using UnifiedInventory.SharedInventory.Network;
 
 namespace UnifiedInventory.SharedInventory.Systems
 {
     public class SyncSystem : ModSystem
     {
-        private double syncTimer = 0;
-
         public override void PostUpdatePlayers()
         {
             var config = ModContent.GetInstance<UnifiedInventoryConfig>();
             if (!config.EnableSharedInventory)
                 return;
 
-            syncTimer += 1.0 / 60.0; // accumulate seconds
-            if (syncTimer < config.SyncIntervalSeconds)
-                return;
-            syncTimer = 0;
-
             int team = Main.LocalPlayer.team;
             if (team <= 0)
-                return;
-
-            if (Main.playerInventory)
-                return; // Do not sync while user is actively managing inventory
-
-            int? hostId = TeamSyncTracker.GetTeamHost(team);
-            if (!hostId.HasValue || TeamSyncTracker.IsTeamHost(team, Main.myPlayer))
-                return;
-
-            if (!config.ForceHostInventory)
                 return;
 
             if (!TeamInventorySystem.SharedInventories.TryGetValue(team, out var slots))
                 return;
 
             var inventory = Main.LocalPlayer.inventory;
-            for (int i = 0; i < inventory.Length && i < slots.Length; i++)
-            {
-                var local = inventory[i];
-                var shared = slots[i].Item;
+            bool isHost = TeamSyncTracker.IsTeamHost(team, Main.myPlayer);
 
-                if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+            // ✅ 1. HOST: push shared → local inventory (only if ForceHostInventory is true and not interacting)
+            if (config.ForceHostInventory && isHost && !Main.playerInventory)
+            {
+                for (int i = 0; i < inventory.Length && i < slots.Length; i++)
                 {
-                    inventory[i] = shared.Clone();
+                    var local = inventory[i];
+                    var shared = slots[i].Item;
+
+                    if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+                    {
+                        inventory[i] = shared.Clone(); // overwrite local copy
+                    }
+                }
+            }
+
+            // ✅ 2. ANYONE: if player is interacting, push local → shared if different
+            if (Main.playerInventory)
+            {
+                for (int i = 0; i < inventory.Length && i < slots.Length; i++)
+                {
+                    var local = inventory[i];
+                    var shared = slots[i].Item;
+
+                    if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+                    {
+                        slots[i].Item = local.Clone(); // update shared slot
+                        InventoryNetworkSystem.SendSlotChange(team, i, local); // broadcast change
+                    }
                 }
             }
         }

@@ -14,7 +14,7 @@ namespace UnifiedInventory.SharedInventory.Systems
     /// </summary>
     public class TeamInventorySystem : ModSystem
     {
-        public const int MaxSlots = 40;  // adjust to however many shared slots you want
+        public const int MaxSlots = 50;  // adjust to however many shared slots you want
         public const int MaxTeams = 6;   // Terraria has teams 0–5
 
         /// <summary>
