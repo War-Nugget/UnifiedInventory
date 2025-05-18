@@ -24,37 +24,18 @@ namespace UnifiedInventory.SharedInventory.Systems
             var inventory = Main.LocalPlayer.inventory;
             bool isHost = TeamSyncTracker.IsTeamHost(team, Main.myPlayer);
 
-            // ✅ 1. HOST: push shared → local inventory (only if ForceHostInventory is true and not interacting)
-            if (config.ForceHostInventory && isHost)
+         
+            if (Main.playerInventory)
             {
-                if (!Main.playerInventory)
+                for (int i = 0; i < inventory.Length && i < slots.Length; i++)
                 {
-                    // host is not interacting → push shared to local
-                    for (int i = 0; i < inventory.Length && i < slots.Length; i++)
-                    {
-                        var local = inventory[i];
-                        var shared = slots[i].Item;
+                    var local = inventory[i];
+                    var shared = slots[i].Item;
 
-                        if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
-                        {
-                            inventory[i] = shared.Clone();
-                        }
-                    }
-                }
-                
-                else
-                {
-                    // host is interacting → push local to shared
-                    for (int i = 0; i < inventory.Length && i < slots.Length; i++)
+                    if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
                     {
-                        var local = inventory[i];
-                        var shared = slots[i].Item;
-
-                        if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
-                        {
-                            slots[i].Item = local.Clone();
-                            InventoryNetworkSystem.SendSlotChange(team, i, local);
-                        }
+                        slots[i].Item = local.Clone(); // update shared slot
+                        InventoryNetworkSystem.SendSlotChange(team, i, local); // broadcast change
                     }
                 }
             }
