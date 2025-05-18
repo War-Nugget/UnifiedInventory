@@ -39,7 +39,10 @@ namespace UnifiedInventory.SharedInventory.Players
             // Host rebroadcasts changes
             if (Player.team > 0 && TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
             {
-                if (InventoryChanged())
+                // Avoid overwriting shared state while user is interacting with inventory
+                bool interactingWithInventory = Main.playerInventory;
+
+                if (!interactingWithInventory && InventoryChanged())
                 {
                     SeedSharedArray();
                     InventoryNetworkSystem.SendInventory(Player.team);
