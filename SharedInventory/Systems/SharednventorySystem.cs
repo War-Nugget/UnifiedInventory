@@ -8,18 +8,17 @@ using System.Linq;
 
 namespace UnifiedInventory.SharedInventory.Systems
 {
-    /// <summary>
+
     /// Keeps an in-memory array of InventorySlotData for each team,
     /// and saves/loads it with the world.
-    /// </summary>
+ 
     public class TeamInventorySystem : ModSystem
     {
         public const int MaxSlots = 50;  // adjust to however many shared slots you want
         public const int MaxTeams = 6;   // Terraria has teams 0–5
 
-        /// <summary>
         /// teamID → that team’s shared-inventory slots
-        /// </summary>
+    
         public static Dictionary<int, InventorySlotData[]> SharedInventories = new();
 
         public override void OnWorldLoad()
