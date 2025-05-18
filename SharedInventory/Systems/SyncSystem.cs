@@ -25,32 +25,36 @@ namespace UnifiedInventory.SharedInventory.Systems
             bool isHost = TeamSyncTracker.IsTeamHost(team, Main.myPlayer);
 
             // ✅ 1. HOST: push shared → local inventory (only if ForceHostInventory is true and not interacting)
-            if (config.ForceHostInventory && isHost && !Main.playerInventory)
+            if (config.ForceHostInventory && isHost)
             {
-                for (int i = 0; i < inventory.Length && i < slots.Length; i++)
+                if (!Main.playerInventory)
                 {
-                    var local = inventory[i];
-                    var shared = slots[i].Item;
-
-                    if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+                    // host is not interacting → push shared to local
+                    for (int i = 0; i < inventory.Length && i < slots.Length; i++)
                     {
-                        inventory[i] = shared.Clone(); // overwrite local copy
+                        var local = inventory[i];
+                        var shared = slots[i].Item;
+
+                        if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+                        {
+                            inventory[i] = shared.Clone();
+                        }
                     }
                 }
-            }
-
-            // ✅ 2. ANYONE: if player is interacting, push local → shared if different
-            if (Main.playerInventory)
-            {
-                for (int i = 0; i < inventory.Length && i < slots.Length; i++)
+                
+                else
                 {
-                    var local = inventory[i];
-                    var shared = slots[i].Item;
-
-                    if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+                    // host is interacting → push local to shared
+                    for (int i = 0; i < inventory.Length && i < slots.Length; i++)
                     {
-                        slots[i].Item = local.Clone(); // update shared slot
-                        InventoryNetworkSystem.SendSlotChange(team, i, local); // broadcast change
+                        var local = inventory[i];
+                        var shared = slots[i].Item;
+
+                        if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+                        {
+                            slots[i].Item = local.Clone();
+                            InventoryNetworkSystem.SendSlotChange(team, i, local);
+                        }
                     }
                 }
             }
