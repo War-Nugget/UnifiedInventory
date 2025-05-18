@@ -24,20 +24,6 @@ namespace UnifiedInventory.SharedInventory.Systems
             var inventory = Main.LocalPlayer.inventory;
             bool isHost = TeamSyncTracker.IsTeamHost(team, Main.myPlayer);
 
-         
-            // if (isHost && !Main.playerInventory)
-            // {
-            //     for (int i = 0; i < inventory.Length && i < slots.Length; i++)
-            //     {
-            //         var local = inventory[i];
-            //         var shared = slots[i].Item;
-
-            //         if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
-            //         {
-            //             inventory[i] = shared.Clone(); // overwrite local copy
-            //         }
-            //     }
-            // }
 
             // ✅ 2. ANYONE: if player is interacting, push local → shared if different
             if (Main.playerInventory)

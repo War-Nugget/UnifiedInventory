@@ -33,47 +33,41 @@ namespace UnifiedInventory.SharedInventory.UI
 
         public override void OnInitialize()
         {
-            
-
             base.OnInitialize();
             Instance = this;
-            // 1) Grab your InventorySlotData[] for the current team
+
             int teamID = Main.LocalPlayer.team;
-            if (teamID <= 0)
+            if (teamID <= 0 || !TeamInventorySystem.SharedInventories.TryGetValue(teamID, out slotData))
             {
                 slots = null;
-                sharedItems = null;
                 return;
             }
-            this.slotData = TeamInventorySystem.SharedInventories[teamID];
 
-            // 2) Extract the Item[] that UIItemSlot needs
-            sharedItems = this.slotData.Select(s => s.Item).ToArray();
+            previousItems = new Item[slotData.Length];
+            for (int i = 0; i < slotData.Length; i++)
+                previousItems[i] = slotData[i].Item.Clone();
 
-            previousItems = sharedItems.Select(item => item.Clone()).ToArray();
-
-            // 3) Create a UIItemSlot for each array index
             slots = new UIItemSlot[Rows * Columns];
             for (int i = 0; i < slots.Length; i++)
             {
-                var slot = new UIItemSlot(sharedItems, i, ItemSlot.Context.InventoryItem);
+                // Bounds check in case shared array isn't fully sized
+                Item itemRef = i < slotData.Length ? slotData[i].Item : new Item();
 
-                // position in a grid
+                var slot = new UIItemSlot(slotData, i, ItemSlot.Context.InventoryItem);
+
                 int row = i / Columns;
                 int col = i % Columns;
                 slot.Left.Set(col * (SlotSize + Padding), 0f);
                 slot.Top.Set(row * (SlotSize + Padding), 0f);
 
-                // subscribe to click events
                 slot.OnLeftClick += Slot_OnClick;
-                slot.OnRightClick += Slot_OnClick; // optional
-                                                   // Main.NewText("[DEBUG] Slot_OnClick triggered", Microsoft.Xna.Framework.Color.Yellow);
-
+                slot.OnRightClick += Slot_OnClick;
 
                 Append(slot);
                 slots[i] = slot;
             }
         }
+
         public void Refresh()
         {
             RemoveAllChildren();
@@ -100,28 +94,27 @@ namespace UnifiedInventory.SharedInventory.UI
         private void Slot_OnClick(UIMouseEvent evt, UIElement listeningElement)
         {
             int index = Array.IndexOf(slots, (UIItemSlot)listeningElement);
-            if (index < 0 || Main.LocalPlayer.team <= 0) return;
+            if (index < 0 || index >= slotData.Length || Main.LocalPlayer.team <= 0)
+                return;
 
-            // What the player is holding (hotbar pickup or placing into slot)
             Item held = Main.mouseItem;
-            // What used to live in this shared slot
             Item old = slotData[index].Item.Clone();
 
-            // 1) Swap them
-            slotData[index].Item = held.Clone();    // write into the real shared data
-            Main.mouseItem = old;             // give the player back whatever was here
+            // Swap the items
+            slotData[index].Item = held.Clone();
+            Main.mouseItem = old;
             Main.LocalPlayer.inventory[index] = slotData[index].Item.Clone();
 
-            // 2) Broadcast the change
-            InventoryNetworkSystem.SendSlotChange(
-                Main.LocalPlayer.team,
-                index,
-                slotData[index].Item
-            );
+            // Send update to server
+            InventoryNetworkSystem.SendSlotChange(Main.LocalPlayer.team, index, slotData[index].Item);
 
-            // 3) Immediately rebuild the UI so it shows the new item
-            Refresh();
+            // Update cached previous item
+            previousItems[index] = slotData[index].Item.Clone();
+
+            // Refresh visuals only (not full rebuild)
+            slots[index].SetItem(slotData[index].Item);
         }
+
 
         public override void Update(GameTime gameTime)
         {
@@ -131,13 +124,12 @@ namespace UnifiedInventory.SharedInventory.UI
             if (teamID <= 0 || slotData == null || sharedItems == null || previousItems == null)
                 return;
 
-            for (int i = 0; i < sharedItems.Length; i++)
+            for (int i = 0; i < slotData.Length && i < previousItems.Length; i++)
             {
-                if (!ItemEquals(sharedItems[i], previousItems[i]))
+                if (!ItemEquals(slotData[i].Item, previousItems[i]))
                 {
-                    // Send updated item
-                    InventoryNetworkSystem.SendSlotChange(teamID, i, sharedItems[i]);
-                    previousItems[i] = sharedItems[i].Clone();  // update cached state
+                    InventoryNetworkSystem.SendSlotChange(teamID, i, slotData[i].Item);
+                    previousItems[i] = slotData[i].Item.Clone();
                 }
             }
         }

@@ -14,13 +14,11 @@ namespace UnifiedInventory.SharedInventory.Players
 
         public override void PostUpdate()
         {
-            // 1) Detect when we join/switch teams
             if (Player.team > 0 && Player.team != lastTeam)
             {
                 TeamSyncTracker.RegisterTeamHost(Player.team, Player.whoAmI);
                 lastTeam = Player.team;
 
-                // If *we* are the new host, seed the shared array and broadcast it immediately
                 if (TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
                 {
                     SeedSharedArray();
@@ -28,11 +26,17 @@ namespace UnifiedInventory.SharedInventory.Players
                     InventoryNetworkSystem.SendInventory(Player.team);
                 }
 
-                //Refresh the UI
                 SharedInventoryUI.Instance?.Refresh();
+
+                // ✅ Force sync request for non-host player
+                if (Player.whoAmI == Main.myPlayer && !TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
+                {
+                    Main.NewText($"[CLIENT] Requesting full inventory sync for team {Player.team}");
+                    InventoryNetworkSystem.RequestFullSync(Player.team);
+                }
             }
 
-            // 2) If *we* are the host, watch for local changes and re-broadcast
+            // Host rebroadcasts changes
             if (Player.team > 0 && TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
             {
                 // Avoid overwriting shared state while user is interacting with inventory
@@ -46,6 +50,7 @@ namespace UnifiedInventory.SharedInventory.Players
                 }
             }
         }
+
 
         public void OnEnterWorld(Player player)
         {
