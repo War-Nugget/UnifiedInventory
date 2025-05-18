@@ -35,7 +35,10 @@ namespace UnifiedInventory.SharedInventory.Players
             // 2) If *we* are the host, watch for local changes and re-broadcast
             if (Player.team > 0 && TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
             {
-                if (InventoryChanged())
+                // Avoid overwriting shared state while user is interacting with inventory
+                bool interactingWithInventory = Main.playerInventory;
+
+                if (!interactingWithInventory && InventoryChanged())
                 {
                     SeedSharedArray();
                     InventoryNetworkSystem.SendInventory(Player.team);
