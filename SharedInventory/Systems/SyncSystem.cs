@@ -22,21 +22,17 @@ namespace UnifiedInventory.SharedInventory.Systems
                 return;
 
             var inventory = Main.LocalPlayer.inventory;
-            bool isHost = TeamSyncTracker.IsTeamHost(team, Main.myPlayer);
 
-         
-            if (Main.playerInventory)
+            for (int i = 0; i < inventory.Length && i < slots.Length; i++)
             {
-                for (int i = 0; i < inventory.Length && i < slots.Length; i++)
-                {
-                    var local = inventory[i];
-                    var shared = slots[i].Item;
+                var local = inventory[i];
+                var shared = slots[i].Item;
 
-                    if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
-                    {
-                        slots[i].Item = local.Clone(); // update shared slot
-                        InventoryNetworkSystem.SendSlotChange(team, i, local); // broadcast change
-                    }
+                // Sync any differences regardless of inventory open/closed
+                if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+                {
+                    slots[i].Item = local.Clone();
+                    InventoryNetworkSystem.SendSlotChange(team, i, local);
                 }
             }
         }
