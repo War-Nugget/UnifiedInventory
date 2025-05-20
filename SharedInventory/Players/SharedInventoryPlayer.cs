@@ -28,14 +28,13 @@ namespace UnifiedInventory.SharedInventory.Players
 
                 SharedInventoryUI.Instance?.Refresh();
 
-                // ✅ Force sync request for non-host player
+                //  Force sync request for non-host player
                 if (Player.whoAmI == Main.myPlayer && !TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
                 {
                     Main.NewText($"[CLIENT] Requesting full inventory sync for team {Player.team}");
                     InventoryNetworkSystem.RequestFullSync(Player.team);
                 }
             }
-
             // Host rebroadcasts changes
             if (Player.team > 0 && TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
             {
@@ -50,7 +49,6 @@ namespace UnifiedInventory.SharedInventory.Players
                 }
             }
         }
-
 
         public void OnEnterWorld(Player player)
         {
@@ -68,7 +66,6 @@ namespace UnifiedInventory.SharedInventory.Players
                 InventoryNetworkSystem.RequestFullSync(player.team);
             }
         }
-
 
         private void SeedSharedArray()
         {
