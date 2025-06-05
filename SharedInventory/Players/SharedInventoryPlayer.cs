@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using UnifiedInventory.SharedInventory.Systems;
 using UnifiedInventory.SharedInventory.Network;
 using UnifiedInventory.SharedInventory.UI;
+using Terraria.ID;
 
 namespace UnifiedInventory.SharedInventory.Players
 {
@@ -16,10 +17,9 @@ namespace UnifiedInventory.SharedInventory.Players
         {
             if (Player.team > 0 && Player.team != lastTeam)
             {
-                TeamSyncTracker.RegisterTeamHost(Player.team, Player.whoAmI);
                 lastTeam = Player.team;
 
-                if (TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
+                if (Main.netMode == NetmodeID.Server && TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
                 {
                     SeedSharedArray();
                     lastInventorySnapshot = CloneInventory(Player.inventory);
@@ -28,14 +28,11 @@ namespace UnifiedInventory.SharedInventory.Players
 
                 SharedInventoryUI.Instance?.Refresh();
 
-                // ✅ Force sync request for non-host player
                 if (Player.whoAmI == Main.myPlayer && !TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
                 {
-                    Main.NewText($"[CLIENT] Requesting full inventory sync for team {Player.team}");
                     InventoryNetworkSystem.RequestFullSync(Player.team);
                 }
             }
-
             // Host rebroadcasts changes
             if (Player.team > 0 && TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
             {
@@ -50,7 +47,6 @@ namespace UnifiedInventory.SharedInventory.Players
                 }
             }
         }
-
 
         public void OnEnterWorld(Player player)
         {
@@ -68,7 +64,6 @@ namespace UnifiedInventory.SharedInventory.Players
                 InventoryNetworkSystem.RequestFullSync(player.team);
             }
         }
-
 
         private void SeedSharedArray()
         {

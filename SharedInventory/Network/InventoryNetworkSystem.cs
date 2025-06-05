@@ -14,6 +14,7 @@ namespace UnifiedInventory.SharedInventory.Network
 {
     public class InventoryNetworkSystem : ModSystem
     {
+        public static bool HasReceivedFullSync = false;
         public enum PacketType : byte
         {
             SyncInventory = 0,
@@ -123,6 +124,9 @@ namespace UnifiedInventory.SharedInventory.Network
                         }
 
                         SharedInventoryUI.Instance?.Refresh();   // force UI redraw
+
+                        HasReceivedFullSync = true;
+                        
                         break;
                     }
 

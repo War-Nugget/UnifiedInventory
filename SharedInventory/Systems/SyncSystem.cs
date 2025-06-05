@@ -3,6 +3,7 @@ using Terraria.ModLoader;
 using UnifiedInventory.SharedInventory.Config;
 using UnifiedInventory.SharedInventory.Systems; // for TeamSyncTracker & TeamInventorySystem
 using UnifiedInventory.SharedInventory.Network;
+using Terraria.ID;
 
 namespace UnifiedInventory.SharedInventory.Systems
 {
@@ -17,6 +18,9 @@ namespace UnifiedInventory.SharedInventory.Systems
             int team = Main.LocalPlayer.team;
             if (team <= 0)
                 return;
+
+            if (Main.netMode == NetmodeID.MultiplayerClient && !InventoryNetworkSystem.HasReceivedFullSync)
+            return;   
 
             if (!TeamInventorySystem.SharedInventories.TryGetValue(team, out var slots))
                 return;
