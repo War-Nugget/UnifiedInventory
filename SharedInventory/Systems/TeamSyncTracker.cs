@@ -17,7 +17,7 @@ namespace UnifiedInventory.SharedInventory.Systems
             if (Main.netMode == NetmodeID.Server && !teamHosts.ContainsKey(team))
             {
                 teamHosts[team] = playerId;
-                Main.NewText($"[Server] Registered Player {playerId} as host for Team {team}");
+               // Main.NewText($"[Server] Registered Player {playerId} as host for Team {team}");
             }
         }
         public static int? GetTeamHost(int team)

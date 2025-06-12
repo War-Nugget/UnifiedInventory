@@ -43,8 +43,8 @@ namespace UnifiedInventory.SharedInventory.Network
 
             // 🧪 Debug: Confirm we're sending the inventory sync
             string target = toClient == -1 ? "all clients" : $"client {toClient}";
-            Main.NewText($"[SERVER] Sending full inventory sync for Team {teamID} to {target}", 
-                        Microsoft.Xna.Framework.Color.LightBlue);
+            // Main.NewText($"[SERVER] Sending full inventory sync for Team {teamID} to {target}", 
+            //             Microsoft.Xna.Framework.Color.LightBlue);
 
             packet.Send(toClient, ignoreClient);
         }
@@ -76,7 +76,7 @@ namespace UnifiedInventory.SharedInventory.Network
 
         public void ReceivePacket(BinaryReader reader, int whoAmI)
         {
-            Main.NewText($"[DEBUG] Received packet (netMode={Main.netMode})", Microsoft.Xna.Framework.Color.Gray);
+           // Main.NewText($"[DEBUG] Received packet (netMode={Main.netMode})", Microsoft.Xna.Framework.Color.Gray);
 
             var msg = (PacketType)reader.ReadByte();
             if (msg == PacketType.RequestFullSync && Main.netMode != NetmodeID.Server)
@@ -91,7 +91,7 @@ namespace UnifiedInventory.SharedInventory.Network
                     {
                         if (Main.netMode != NetmodeID.Server) return;
                         int team = reader.ReadInt32();
-                        Main.NewText($"[SERVER] Received RequestFullSync from player {Main.player[whoAmI].name} for Team {team}", Microsoft.Xna.Framework.Color.Orange);
+                        // Main.NewText($"[SERVER] Received RequestFullSync from player {Main.player[whoAmI].name} for Team {team}", Microsoft.Xna.Framework.Color.Orange);
                         SendInventory(team, toClient: whoAmI);
                         break;
                     }
@@ -166,7 +166,7 @@ namespace UnifiedInventory.SharedInventory.Network
                                     Main.LocalPlayer.inventory,
                                     TeamInventorySystem.SharedInventories[team]
                                 );
-                                Main.NewText($"[Client Sync] Updated slot {slotIndex} for Team {team}", Microsoft.Xna.Framework.Color.LightGreen);
+                               //  Main.NewText($"[Client Sync] Updated slot {slotIndex} for Team {team}", Microsoft.Xna.Framework.Color.LightGreen);
 
                             }
 

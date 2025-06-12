@@ -15,15 +15,21 @@ namespace UnifiedInventory.SharedInventory.Players
 
         public override void PostUpdate()
         {
+         
             if (Player.team > 0 && Player.team != lastTeam)
             {
                 lastTeam = Player.team;
 
-                if (Main.netMode == NetmodeID.Server && TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
+                if (Main.netMode == NetmodeID.Server)
                 {
-                    SeedSharedArray();
-                    lastInventorySnapshot = CloneInventory(Player.inventory);
-                    InventoryNetworkSystem.SendInventory(Player.team);
+                    TeamSyncTracker.RegisterTeamHost(Player.team, Player.whoAmI);
+
+                    if (TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
+                    {
+                        SeedSharedArray();
+                        lastInventorySnapshot = CloneInventory(Player.inventory);
+                        InventoryNetworkSystem.SendInventory(Player.team);
+                    }
                 }
 
                 SharedInventoryUI.Instance?.Refresh();
@@ -33,10 +39,11 @@ namespace UnifiedInventory.SharedInventory.Players
                     InventoryNetworkSystem.RequestFullSync(Player.team);
                 }
             }
+
             // Host rebroadcasts changes
             if (Player.team > 0 && TeamSyncTracker.IsTeamHost(Player.team, Player.whoAmI))
             {
-                // Avoid overwriting shared state while user is interacting with inventory
+                
                 bool interactingWithInventory = Main.playerInventory;
 
                 if (!interactingWithInventory && InventoryChanged())
@@ -57,7 +64,7 @@ namespace UnifiedInventory.SharedInventory.Players
                 {
                     var ui = new SharedInventoryUI();
                     ui.Activate();        // this wires up the UIItemSlots
-                    ui.OnInitialize();    // sets Instance=this, builds your slots array
+                    ui.OnInitialize();    // builds your slots array
                 }
 
                 // now you can request the full sync…
