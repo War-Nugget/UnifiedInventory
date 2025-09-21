@@ -19,26 +19,35 @@ namespace UnifiedInventory.SharedInventory.Systems
             if (team <= 0)
                 return;
 
-            if (Main.netMode == NetmodeID.MultiplayerClient && !InventoryNetworkSystem.HasReceivedFullSync)
-            return;   
-
-            if (!TeamInventorySystem.SharedInventories.TryGetValue(team, out var slots))
-                return;
-
-            var inventory = Main.LocalPlayer.inventory;
-
-            for (int i = 0; i < inventory.Length && i < slots.Length; i++)
+            // Clients: only mirror server/shared -> local; never push from here.
+            if (Main.netMode == NetmodeID.MultiplayerClient)
             {
-                var local = inventory[i];
-                var shared = slots[i].Item;
+                if (!InventoryNetworkSystem.HasReceivedFullSync)
+                    return;
 
-                // Sync any differences regardless of inventory open/closed
-                if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+                if (!TeamInventorySystem.SharedInventories.TryGetValue(team, out var slots))
+                    return;
+
+                var inv = Main.LocalPlayer.inventory;
+
+                for (int i = 0; i < inv.Length && i < slots.Length; i++)
                 {
-                    slots[i].Item = local.Clone();
-                    InventoryNetworkSystem.SendSlotChange(team, i, local);
+                    var shared = slots[i].Item;
+                    var local  = inv[i];
+
+                    // If local differs from authoritative shared, adopt shared.
+                    if (local.netID != shared.netID || local.stack != shared.stack || local.prefix != shared.prefix)
+                    {
+                        inv[i] = shared.Clone(); // adopt server state without sending any packet
+                    }
                 }
+
+                return;
             }
+
+            // Server: do nothing here. The server's authoritative updates & rebroadcasts
+            // happen inside InventoryNetworkSystem.ReceivePacket (ModifySlot/SyncInventory).
+            // Leaving this empty avoids redundant or conflicting writes.
         }
     }
 }

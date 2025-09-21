@@ -12,6 +12,8 @@ namespace UnifiedInventory
     public class UnifiedInventory : Mod
     {
         public static UnifiedInventory Instance { get; private set; }
+        public static object SharedInventory { get; internal set; }
+
         private UserInterface _sharedInterface;
 
         public override void Load()

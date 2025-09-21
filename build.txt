@@ -1,4 +1,4 @@
 displayName = Unified Inventory
 author = War-Nugget
 
-version = 0.4
+version = 0.4.3
